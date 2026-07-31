@@ -2,7 +2,7 @@
  * Snippet Title: Visible course details on the course management page
  * Scope:         global
  * Goal:          easeofuse
- * Description:   On the course and category management page, selecting a category has an immediate visible effect, but selecting a course does not: Moodle renders the course details full width below both listings at every viewport size, so the panel almost always opens below the fold and the only feedback is a thin border on the selected row. This snippet turns the course details into an inspector panel which is in view the moment the page comes back and which stays in view while you scroll the listings: a sticky third column on wide screens, a sticky side column on laptops and a panel above the listings on narrow screens. The selected course is marked much more clearly as well.
+ * Description:   On the course and category management page, selecting a category has an immediate visible effect, but selecting a course does not: Moodle renders the course details full width below both listings at every viewport size, so the panel almost always opens below the fold and the only feedback is a thin border on the selected row. This snippet turns the course details into an inspector panel which is in view the moment the page comes back and which stays in view while you scroll the listings: a sticky third column on wide screens, a sticky side column on laptops and a panel above the listings on narrow screens. The details panel is aligned with the look of the two listings, its key and value pairs are laid out to survive the narrower column, and the selected course is marked much more clearly.
  * Creator:       bdecent gmbh
  * Tested on:     Moodle 5.2 with Boost Union 5.2 (SCSS compile checked, visual check pending)
  * Usage note:    The layout only changes while a course is actually selected, the page is untouched otherwise. The two width thresholds are SCSS variables and are set to the same values which Moodle core uses for this page, so the listings never get narrower than they are today. On narrow screens the panel is moved above the listings visually while it stays after them in the markup, so that it is the first thing on screen after selecting a course; the reading order for screen readers is unchanged and Moodle's own skip links still jump to all three regions.
@@ -25,7 +25,7 @@ $bu-snippet-coursedetail-split-min: 1200px !default;
 $bu-snippet-coursedetail-wide-min: 1600px !default;
 
 // The gap between the regions.
-$bu-snippet-coursedetail-gap: 1.5rem !default;
+$bu-snippet-coursedetail-gap: 1rem !default;
 
 // The distance which the sticky panel keeps to the top of the viewport, below the navbar.
 $bu-snippet-coursedetail-sticky-offset: 1rem !default;
@@ -33,6 +33,9 @@ $bu-snippet-coursedetail-sticky-offset: 1rem !default;
 // The maximum height of the panel while it sits above the listings on narrow screens.
 // This keeps the listings within reach instead of pushing them far down.
 $bu-snippet-coursedetail-narrow-maxheight: 60vh !default;
+
+// The width which the key column of the details keeps at least.
+$bu-snippet-coursedetail-keywidth: 7.5rem !default;
 
 // The accent which marks the selected course in the listing.
 $bu-snippet-coursedetail-accent: $primary !default;
@@ -60,14 +63,17 @@ $bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-co
     margin-left: 0;
     gap: $bu-snippet-coursedetail-gap;
 
-    // Drop the Bootstrap column widths, the grid decides how wide a region is.
+    // Drop the Bootstrap column widths and paddings, the grid decides how wide a region is and
+    // the grid gap decides how far the regions are apart. The paddings come from the .px-3 and
+    // .mb-3 utility classes, which carry !important, so they can only be dropped with one.
     > #category-listing,
     > #course-listing,
     > #course-detail {
         width: auto;
         max-width: none;
-        margin: 0;
-        padding: 0;
+        padding-right: 0 !important; /* stylelint-disable-line declaration-no-important */
+        padding-left: 0 !important; /* stylelint-disable-line declaration-no-important */
+        margin-bottom: 0 !important; /* stylelint-disable-line declaration-no-important */
     }
 }
 
@@ -140,6 +146,51 @@ $bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-co
         top: $bu-snippet-coursedetail-top;
         max-height: calc(100vh - #{$bu-snippet-coursedetail-top} - #{$bu-snippet-coursedetail-sticky-offset});
         overflow-y: auto;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// The look of the details panel.
+//
+// The two listings render their heading as an h3 which carries the card-header class itself,
+// while the details panel wraps its heading into a separate card-header element. The core rule
+// which pads the h3 elements of this page therefore applies on top of the card header padding
+// and makes the third column look different from the other two. Dropping the padding of the
+// wrapper lets the heading line up with the two listings again.
+// ---------------------------------------------------------------------------
+
+#course-detail .course-detail {
+    > .card-header {
+        padding: 0;
+    }
+}
+
+// The key and value pairs are laid out as Bootstrap grid columns, which reserve a quarter of
+// the width for the key. That is fine across the full page width, but in a column it leaves so
+// little room that labels start breaking in the middle of a word. A two column grid with a
+// minimum width for the key keeps the labels readable and lets the values use the rest.
+#course-detail .card-body .detail-pair {
+    display: grid;
+    grid-template-columns: minmax(#{$bu-snippet-coursedetail-keywidth}, max-content) 1fr;
+    gap: 0 .75rem;
+    margin: 0;
+    padding: .4rem 0;
+    border-bottom: $border-width solid $border-color;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+
+    > .pair-key,
+    > .pair-value {
+        width: auto;
+        max-width: none;
+        padding: 0;
+        // Let long values shrink within their grid column instead of pushing it open.
+        min-width: 0;
+        // Wrap between words and only break inside a word if it does not fit at all.
+        word-break: normal;
+        overflow-wrap: break-word;
     }
 }
 
