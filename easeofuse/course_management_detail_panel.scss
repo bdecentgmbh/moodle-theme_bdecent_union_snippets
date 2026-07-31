@@ -58,6 +58,12 @@ $bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-co
 // ---------------------------------------------------------------------------
 
 #course-category-listings.course-selected {
+    // Moodle builds this container with the d-flex utility class, whose display declaration
+    // carries !important. The grid can therefore only take over with an !important of its own.
+    // Without this, every rule below is inert and the regions are laid out as flex items which
+    // shrink to their content - which collapses the details panel on narrow viewports.
+    display: grid !important; /* stylelint-disable-line declaration-no-important */
+
     // Take over the spacing from the Bootstrap row, the grid gap does it from here on.
     margin-right: 0;
     margin-left: 0;
@@ -84,8 +90,7 @@ $bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-co
 // capped so that the listings stay one short scroll away.
 @media (max-width: #{$bu-snippet-coursedetail-split-min - 1px}) {
     #course-category-listings.course-selected {
-        display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
 
         > #course-detail {
             order: -1;
@@ -101,8 +106,7 @@ $bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-co
 // becomes narrower than it is today - the details just stop being banished to the bottom.
 @media (min-width: #{$bu-snippet-coursedetail-split-min}) and (max-width: #{$bu-snippet-coursedetail-wide-min - 1px}) {
     #course-category-listings.course-selected {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         align-items: start;
 
         &.viewmode-combined {
@@ -128,12 +132,11 @@ $bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-co
 // Wide screens: all three regions next to each other, which is the layout this page used to have.
 @media (min-width: #{$bu-snippet-coursedetail-wide-min}) {
     #course-category-listings.course-selected {
-        display: grid;
         align-items: start;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 
         &.viewmode-combined {
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
         }
     }
 }
@@ -165,21 +168,20 @@ $bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-co
     }
 }
 
-// The key and value pairs are laid out as Bootstrap grid columns, which reserve a quarter of
-// the width for the key. That is fine across the full page width, but in a column it leaves so
-// little room that labels start breaking in the middle of a word. A two column grid with a
-// minimum width for the key keeps the labels readable and lets the values use the rest.
-#course-detail .card-body .detail-pair {
+// The key and value pairs are laid out as Bootstrap grid columns which reserve a quarter of the
+// width for the key. That is fine across the full page width, but in a column it leaves so little
+// room that labels start breaking in the middle of a word. A two column grid with a minimum width
+// for the key keeps the labels readable and lets the values use the rest.
+//
+// Moodle uses this same component in all three regions: for the sorting and bulk move forms of
+// the two listings and for the rows of the details panel. All of them profit from the fix, so it
+// is not scoped to the details panel.
+#course-category-listings .detail-pair {
     display: grid;
-    grid-template-columns: minmax(#{$bu-snippet-coursedetail-keywidth}, max-content) 1fr;
+    grid-template-columns: minmax(#{$bu-snippet-coursedetail-keywidth}, max-content) minmax(0, 1fr);
     gap: 0 .75rem;
     margin: 0;
     padding: .4rem 0;
-    border-bottom: $border-width solid $border-color;
-
-    &:last-child {
-        border-bottom: 0;
-    }
 
     > .pair-key,
     > .pair-value {
@@ -191,6 +193,16 @@ $bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-co
         // Wrap between words and only break inside a word if it does not fit at all.
         word-break: normal;
         overflow-wrap: break-word;
+    }
+}
+
+// Within the details panel the pairs are a table of facts, so hairlines make them scannable.
+// In the listings the pairs are form rows, where hairlines would only add noise.
+#course-detail .card-body .detail-pair {
+    border-bottom: $border-width solid $border-color;
+
+    &:last-child {
+        border-bottom: 0;
     }
 }
 
