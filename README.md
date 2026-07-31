@@ -21,10 +21,26 @@ top level folder.
 | [`easeofuse/course_reports_cards.scss`](easeofuse/course_reports_cards.scss) | easeofuse | course | Turns the plain link list on the course reports page into a responsive grid of cards with a recognisable icon per report. |
 | [`easeofuse/course_reuse_cards.scss`](easeofuse/course_reuse_cards.scss) | easeofuse | course | The same card grid for the course reuse page — import, backup, restore, copy and reset. |
 | [`easeofuse/participants_filter_collapsed.scss`](easeofuse/participants_filter_collapsed.scss) | easeofuse | course | Collapses the filter form on the enrolled users page into a small filter icon, because filtering participants is only needed in large courses. |
+| [`easeofuse/course_management_subtle_actions.scss`](easeofuse/course_management_subtle_actions.scss) | easeofuse | global | Dims the action icons on the course and category management page and brings them back as soon as you point at, or tab into, the row they belong to. |
 
 Every snippet is configurable through SCSS variables at the top of the file. They are declared
 with `!default`, so you can override any of them in Boost Union's *Raw initial SCSS* setting
 without editing the snippet itself.
+
+## Snippets and Moodle versions
+
+SCSS snippets carry no information about the Moodle version they were written for. Boost Union
+applies every enabled snippet regardless of the Moodle version, and the only version information
+in a snippet is the free-text `Tested on` header, which is shown to admins but never evaluated.
+
+That matters because snippets depend on Moodle's core markup, which changes between releases. A
+snippet written against Moodle 5.2 can therefore do nothing, or occasionally the wrong thing, on
+Moodle 4.5.
+
+If you need to serve several Moodle versions, either branch this repository per Moodle version
+(`MOODLE_405_STABLE`, `MOODLE_502_STABLE`, ...) or keep one folder per version. `local_busnippets`
+supports the placeholders `{moodlebranch}` and `{moodleversion}` in its archive URL and
+subdirectory settings for exactly this, so that a single setting value works on every site.
 
 ## Installation
 

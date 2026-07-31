@@ -1,0 +1,55 @@
+/**
+ * Snippet Title: Subtle action icons on the course management page
+ * Scope:         global
+ * Goal:          easeofuse
+ * Description:   The course and category management page shows a whole row of action icons next to every category and every course. All of these icons compete for attention at the same time, which makes the listings look busy and makes it hard to find the category or course you are actually looking for. This snippet dims the action icons and brings them back to full strength as soon as you point at, or tab into, the row they belong to.
+ * Creator:       bdecent gmbh
+ * Tested on:     Moodle 5.2 with Boost Union 5.2 (SCSS compile checked, visual check pending)
+ * Usage note:    The icons are only dimmed, never hidden, so they stay clickable at all times and screen readers are not affected at all. Keyboard users get the icons back at full strength as soon as they tab into a row, and an opened action menu stays visible while it is open. Set the SCSS variable at the top of the snippet to a higher value if the dimmed icons should stay a little more visible.
+ *
+ * @copyright     2026 bdecent gmbh <https://bdecent.de>
+ * @author        bdecent gmbh <info@bdecent.de>
+ * @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+// ---------------------------------------------------------------------------
+// Configuration.
+// ---------------------------------------------------------------------------
+
+// The opacity of the action icons while their row is not used.
+// Use a value between 0 and 1. The higher the value, the more visible the icons stay.
+$bu-snippet-managementactions-opacity: .1 !default;
+
+// The duration of the fade. Set it to 0s to switch the icons without a fade.
+$bu-snippet-managementactions-duration: .15s !default;
+
+// ---------------------------------------------------------------------------
+// The action icons.
+//
+// #course-category-listings is the id of the listing grid on the course and category
+// management page, so the snippet cannot leak into any other page.
+// ---------------------------------------------------------------------------
+
+#course-category-listings {
+    .item-actions {
+        opacity: $bu-snippet-managementactions-opacity;
+        transition: opacity $bu-snippet-managementactions-duration ease-in-out;
+    }
+
+    // Bring the icons back as soon as the row is pointed at or used with the keyboard.
+    // :focus-within is what keeps the icons reachable for keyboard users. Moodle adds the
+    // .show class to the action menu while it is open, which keeps the icons of that row
+    // visible even if the focus should wander off into the opened menu.
+    .listitem:hover .item-actions,
+    .listitem:focus-within .item-actions,
+    .item-actions.show {
+        opacity: 1;
+    }
+}
+
+// Respect the users' motion preferences.
+@media (prefers-reduced-motion: reduce) {
+    #course-category-listings .item-actions {
+        transition: none;
+    }
+}
