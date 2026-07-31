@@ -44,9 +44,23 @@ $bu-snippet-coursedetail-accent: $primary !default;
 // Derived values. There should be no need to modify anything below this line.
 // ---------------------------------------------------------------------------
 
-// Moodle publishes the navbar height as a CSS custom property on :root, so the sticky panel
-// stays correct even if the navbar height is changed by a theme setting or another snippet.
-$bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-coursedetail-sticky-offset});
+// The sticky panel has to clear the whole fixed header. Moodle publishes the navbar height as a
+// CSS custom property, but the Boost Union smart menu bar is a second fixed bar stacked above the
+// navbar and its height is not published anywhere. So the full height is assembled here: the
+// navbar alone by default, plus the menu bar on pages which actually have one.
+//
+// The "Slim menu bar" snippet publishes its own height as --bu-menubar-height. If it is not in
+// use, the fallback is the menu bar height which Boost Union itself uses.
+:root {
+    --bu-snippet-coursedetail-header: var(--navbar-height, 60px);
+}
+
+body:has(.navbar.boost-union-menubar) {
+    --bu-snippet-coursedetail-header:
+        calc(var(--navbar-height, 60px) + var(--bu-menubar-height, #{$bu-smartmenu-menubar-height}));
+}
+
+$bu-snippet-coursedetail-top: calc(var(--bu-snippet-coursedetail-header) + #{$bu-snippet-coursedetail-sticky-offset});
 
 // ---------------------------------------------------------------------------
 // The layout.

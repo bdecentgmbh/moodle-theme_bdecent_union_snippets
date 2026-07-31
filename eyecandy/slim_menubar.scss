@@ -46,6 +46,13 @@ $bu-snippet-slimmenubar-offset: calc(#{$navbar-height} + #{$bu-snippet-slimmenub
 // The slim menu bar.
 // ---------------------------------------------------------------------------
 
+// Publish the height of the bar, so that sticky elements elsewhere on the site can offset
+// themselves against the full height of the fixed header. Moodle's own --navbar-height only
+// describes the navbar, while the menu bar is a second fixed bar stacked above it.
+:root {
+    --bu-menubar-height: #{$bu-snippet-slimmenubar-height};
+}
+
 .theme-boost-union-smartmenu {
     .navbar.fixed-top.boost-union-menubar {
         // Shrink the bar itself. The navbar padding has to go as well, otherwise the

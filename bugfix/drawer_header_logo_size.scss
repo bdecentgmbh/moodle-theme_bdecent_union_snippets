@@ -1,0 +1,39 @@
+/**
+ * Snippet Title: Fix the oversized logo in the mobile navigation drawer
+ * Scope:         global
+ * Goal:          bugfix
+ * Description:   On mobile viewports, the header of the primary navigation drawer shows the site logo. Unlike the logo in the navbar, this one is not constrained by any rule: Moodle sizes the logo with selectors which all require it to sit inside the navbar, and the copy in the drawer header matches none of them. A logo which is larger than the drawer header therefore breaks out of it and can push the close button off the screen. This snippet fits the logo into the drawer header.
+ * Creator:       bdecent gmbh
+ * Tested on:     Moodle 5.2 with Boost Union 5.2 (SCSS compile checked, visual check pending)
+ * Usage note:    The effect is only visible if a compact logo is configured and it is larger than the drawer header, so on a site with a small logo this snippet changes nothing. The maximum height is an SCSS variable which is declared with !default, so it can be overridden in "Raw initial SCSS" without touching the snippet.
+ *
+ * @copyright     2026 bdecent gmbh <https://bdecent.de>
+ * @author        bdecent gmbh <info@bdecent.de>
+ * @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+// ---------------------------------------------------------------------------
+// Configuration.
+// ---------------------------------------------------------------------------
+
+// The maximum height of the logo in the drawer header. The header itself is 60px high, so this
+// leaves a little air above and below the logo.
+$bu-snippet-drawerlogo-maxheight: 40px !default;
+
+// ---------------------------------------------------------------------------
+// The logo in the drawer header.
+//
+// Moodle constrains the logo with "nav.navbar .logo img", ".navbar.fixed-top .navbar-brand .logo"
+// and ".navbar-brand .logo". The logo in the drawer header sits in a plain link inside
+// .drawerheader and therefore matches none of them, which leaves it at its natural size. The
+// sitename, which is rendered instead of the logo when no logo is configured, is handled by
+// Moodle already - only the image was forgotten.
+// ---------------------------------------------------------------------------
+
+.drawerheader .logo {
+    max-height: $bu-snippet-drawerlogo-maxheight;
+    // Keep a wide logo from pushing the close button of the drawer out of the header.
+    max-width: 100%;
+    width: auto;
+    object-fit: contain;
+}

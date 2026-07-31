@@ -17,6 +17,7 @@ top level folder.
 
 | Snippet | Goal | Scope | What it does |
 |---|---|---|---|
+| [`bugfix/drawer_header_logo_size.scss`](bugfix/drawer_header_logo_size.scss) | bugfix | global | Fits the site logo into the header of the mobile navigation drawer. Moodle sizes the logo with selectors which all require it to sit inside the navbar, so the copy in the drawer header is left at its natural size and can break out of the header. |
 | [`eyecandy/slim_menubar.scss`](eyecandy/slim_menubar.scss) | eyecandy | global | Turns the Boost Union smart menu bar into a slim, compact bar with a dark background and right-aligned menu items. Every vertical offset which Boost Union derives from the menu bar height — page content, left, right and message drawers, drawer togglers, the navbar below — is recalculated from a single height variable, so the layout stays intact. |
 | [`easeofuse/course_reports_cards.scss`](easeofuse/course_reports_cards.scss) | easeofuse | course | Turns the plain link list on the course reports page into a responsive grid of cards with a recognisable icon per report. |
 | [`easeofuse/course_reuse_cards.scss`](easeofuse/course_reuse_cards.scss) | easeofuse | course | The same card grid for the course reuse page — import, backup, restore, copy and reset. |
