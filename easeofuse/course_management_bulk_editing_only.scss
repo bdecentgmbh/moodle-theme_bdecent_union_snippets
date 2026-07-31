@@ -1,0 +1,51 @@
+/**
+ * Snippet Title: Bulk and sorting tools only in edit mode on the course management page
+ * Scope:         global
+ * Goal:          easeofuse
+ * Description:   The course and category management page shows its bulk and sorting tools all the time, although they are only needed while the category is actually being reorganised. Sorting categories, sorting courses, the courses per page selector and the two bulk move forms take up a lot of room and turn a page which is mostly used to look something up into a page full of forms. This snippet shows those tools only while edit mode is switched on. Creating a category, creating a course and the actions of an individual category or course stay available at all times.
+ * Creator:       bdecent gmbh
+ * Tested on:     Moodle 5.2 with Boost Union 5.2 (SCSS compile checked, visual check pending)
+ * Usage note:    The snippet keys on Moodle's edit mode, so the tools come back with the "Edit mode" switch in the navbar - no setting and no capability is changed, and nothing is removed from the page permanently. Since only CSS is involved, the hidden forms are still submitted if they are reached in some other way, so this is a tidier page rather than a restriction; use capabilities if you need to actually take these tools away from someone.
+ *
+ * @copyright     2026 bdecent gmbh <https://bdecent.de>
+ * @author        bdecent gmbh <info@bdecent.de>
+ * @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+// ---------------------------------------------------------------------------
+// The bulk and sorting tools.
+//
+// Moodle adds the "editing" class to the body while edit mode is switched on, so everything
+// here applies to the page in its normal, reading state only.
+//
+// What is hidden:
+//   .category-bulk-actions  the "Sorting" form and the "Move selected categories to" form
+//   .course-bulk-actions    the "Move selected courses to" form
+//   the action menus of the course listing, which are "Sort courses" and "Per page"
+//
+// What deliberately stays:
+//   the "Create new category" and "Create new course" buttons, which are plain links in the
+//   listing actions and are not action menus, and every action of an individual category or
+//   course, which lives inside a .listitem and is not touched here at all.
+// ---------------------------------------------------------------------------
+
+body:not(.editing) #course-category-listings {
+    // The bulk action blocks of both listings.
+    .category-bulk-actions,
+    .course-bulk-actions {
+        display: none;
+    }
+
+    // "Sort courses" and "Per page" are the only two action menus in the listing actions.
+    // The create buttons next to them are links, so they are not affected.
+    .course-listing-actions .moodle-actionmenu {
+        display: none;
+    }
+
+    // Without the menus next to it, the create button no longer needs a bottom margin which was
+    // meant to separate a whole row of controls from the listing below.
+    .course-listing-actions,
+    .category-listing-actions {
+        margin-bottom: .5rem !important; /* stylelint-disable-line declaration-no-important */
+    }
+}

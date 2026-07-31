@@ -79,7 +79,10 @@ $bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-co
         max-width: none;
         padding-right: 0 !important; /* stylelint-disable-line declaration-no-important */
         padding-left: 0 !important; /* stylelint-disable-line declaration-no-important */
-        margin-bottom: 0 !important; /* stylelint-disable-line declaration-no-important */
+        // Moodle core gives the details panel a top margin of its own between 1200px and 1600px,
+        // which would push it out of line with the category listing next to it. The .mb-3 utility
+        // class needs an !important to be dropped, so all margins go in one declaration.
+        margin: 0 !important; /* stylelint-disable-line declaration-no-important */
     }
 }
 
@@ -194,6 +197,20 @@ $bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-co
         word-break: normal;
         overflow-wrap: break-word;
     }
+
+    // The bulk action pairs hold a select and a submit button, wrapped into an inner element
+    // which Moodle builds with the d-flex utility class. That never wraps, so the button was
+    // pushed out of the column. Letting it wrap keeps both within the column at any width.
+    > .pair-value > .d-flex {
+        flex-wrap: wrap;
+        gap: .5rem;
+        align-items: center;
+        min-width: 0;
+
+        select {
+            max-width: 100%;
+        }
+    }
 }
 
 // Within the details panel the pairs are a table of facts, so hairlines make them scannable.
@@ -221,4 +238,23 @@ $bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-co
     .coursename {
         font-weight: $font-weight-bold;
     }
+}
+
+// ---------------------------------------------------------------------------
+// The page heading.
+//
+// "Manage course categories and courses" only repeats what the breadcrumb, the page heading and
+// the view mode selector above it already say, and it costs a line of vertical space on a page
+// which needs all the room it can get. It is hidden the accessible way rather than removed, so
+// that screen reader users keep the heading which structures the page for them.
+// ---------------------------------------------------------------------------
+
+#page-course-management #action_bar + h2 {
+    position: absolute !important; /* stylelint-disable-line declaration-no-important */
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
