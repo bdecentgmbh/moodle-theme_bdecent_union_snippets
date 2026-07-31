@@ -5,7 +5,7 @@
  * Description:   The course and category management page shows a whole row of action icons next to every category and every course. All of these icons compete for attention at the same time, which makes the listings look busy and makes it hard to find the category or course you are actually looking for. This snippet dims the action icons and brings them back to full strength as soon as you point at, or tab into, the row they belong to.
  * Creator:       bdecent gmbh
  * Tested on:     Moodle 5.2 with Boost Union 5.2 (SCSS compile checked, visual check pending)
- * Usage note:    The icons are only dimmed, never hidden, so they stay clickable at all times and screen readers are not affected at all. Keyboard users get the icons back at full strength as soon as they tab into a row, and an opened action menu stays visible while it is open. Set the SCSS variable at the top of the snippet to a higher value if the dimmed icons should stay a little more visible.
+ * Usage note:    The icons are only dimmed, never hidden, so they stay clickable at all times and screen readers are not affected at all. Keyboard users get the icons back at full strength as soon as they tab into a row, an opened action menu stays visible while it is open, and the selected category and course keep their icons visible permanently. Set the SCSS variable at the top of the snippet to a higher value if the dimmed icons should stay a little more visible.
  *
  * @copyright     2026 bdecent gmbh <https://bdecent.de>
  * @author        bdecent gmbh <info@bdecent.de>
@@ -40,8 +40,14 @@ $bu-snippet-managementactions-duration: .15s !default;
     // :focus-within is what keeps the icons reachable for keyboard users. Moodle adds the
     // .show class to the action menu while it is open, which keeps the icons of that row
     // visible even if the focus should wander off into the opened menu.
+    //
+    // The selected category and the selected course keep their icons at full strength at all
+    // times. Those are the two rows the user is working with, so their actions are the ones
+    // most likely to be needed next, and it gives the selection another visual anchor.
+    // Moodle marks both of them with data-selected, so one rule covers categories and courses.
     .listitem:hover .item-actions,
     .listitem:focus-within .item-actions,
+    .listitem[data-selected="1"] .item-actions,
     .item-actions.show {
         opacity: 1;
     }

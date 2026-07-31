@@ -1,0 +1,161 @@
+/**
+ * Snippet Title: Visible course details on the course management page
+ * Scope:         global
+ * Goal:          easeofuse
+ * Description:   On the course and category management page, selecting a category has an immediate visible effect, but selecting a course does not: Moodle renders the course details full width below both listings at every viewport size, so the panel almost always opens below the fold and the only feedback is a thin border on the selected row. This snippet turns the course details into an inspector panel which is in view the moment the page comes back and which stays in view while you scroll the listings: a sticky third column on wide screens, a sticky side column on laptops and a panel above the listings on narrow screens. The selected course is marked much more clearly as well.
+ * Creator:       bdecent gmbh
+ * Tested on:     Moodle 5.2 with Boost Union 5.2 (SCSS compile checked, visual check pending)
+ * Usage note:    The layout only changes while a course is actually selected, the page is untouched otherwise. The two width thresholds are SCSS variables and are set to the same values which Moodle core uses for this page, so the listings never get narrower than they are today. On narrow screens the panel is moved above the listings visually while it stays after them in the markup, so that it is the first thing on screen after selecting a course; the reading order for screen readers is unchanged and Moodle's own skip links still jump to all three regions.
+ *
+ * @copyright     2026 bdecent gmbh <https://bdecent.de>
+ * @author        bdecent gmbh <info@bdecent.de>
+ * @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+// ---------------------------------------------------------------------------
+// Configuration.
+// ---------------------------------------------------------------------------
+
+// From this width on, the course details become a column of their own next to the listings.
+// This is the width at which Moodle core already puts the two listings side by side.
+$bu-snippet-coursedetail-split-min: 1200px !default;
+
+// From this width on, all three regions are shown next to each other.
+// This is the width at which Moodle core stops squeezing the listings into 50% each.
+$bu-snippet-coursedetail-wide-min: 1600px !default;
+
+// The gap between the regions.
+$bu-snippet-coursedetail-gap: 1.5rem !default;
+
+// The distance which the sticky panel keeps to the top of the viewport, below the navbar.
+$bu-snippet-coursedetail-sticky-offset: 1rem !default;
+
+// The maximum height of the panel while it sits above the listings on narrow screens.
+// This keeps the listings within reach instead of pushing them far down.
+$bu-snippet-coursedetail-narrow-maxheight: 60vh !default;
+
+// The accent which marks the selected course in the listing.
+$bu-snippet-coursedetail-accent: $primary !default;
+
+// ---------------------------------------------------------------------------
+// Derived values. There should be no need to modify anything below this line.
+// ---------------------------------------------------------------------------
+
+// Moodle publishes the navbar height as a CSS custom property on :root, so the sticky panel
+// stays correct even if the navbar height is changed by a theme setting or another snippet.
+$bu-snippet-coursedetail-top: calc(var(--navbar-height, 60px) + #{$bu-snippet-coursedetail-sticky-offset});
+
+// ---------------------------------------------------------------------------
+// The layout.
+//
+// Everything is scoped to .course-selected, a class which Moodle core puts onto the listing
+// container while a course is selected. Without a selected course, the page is left alone.
+// The viewmode classes are honoured as well, because the category listing is not rendered in
+// the "Course categories and courses" view mode.
+// ---------------------------------------------------------------------------
+
+#course-category-listings.course-selected {
+    // Take over the spacing from the Bootstrap row, the grid gap does it from here on.
+    margin-right: 0;
+    margin-left: 0;
+    gap: $bu-snippet-coursedetail-gap;
+
+    // Drop the Bootstrap column widths, the grid decides how wide a region is.
+    > #category-listing,
+    > #course-listing,
+    > #course-detail {
+        width: auto;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+}
+
+// Narrow screens: a single column with the details on top.
+//
+// Selecting a course is a full page load, so the browser arrives at the top of the page. Putting
+// the panel first is therefore what makes it visible without any scrolling at all. Its height is
+// capped so that the listings stay one short scroll away.
+@media (max-width: #{$bu-snippet-coursedetail-split-min - 1px}) {
+    #course-category-listings.course-selected {
+        display: grid;
+        grid-template-columns: 1fr;
+
+        > #course-detail {
+            order: -1;
+            max-height: $bu-snippet-coursedetail-narrow-maxheight;
+            overflow-y: auto;
+        }
+    }
+}
+
+// Laptops: the listings share the left half, the details own the right half.
+//
+// Both listings keep the 50% width which Moodle core gives them at this size already, so nothing
+// becomes narrower than it is today - the details just stop being banished to the bottom.
+@media (min-width: #{$bu-snippet-coursedetail-split-min}) and (max-width: #{$bu-snippet-coursedetail-wide-min - 1px}) {
+    #course-category-listings.course-selected {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+
+        &.viewmode-combined {
+            grid-template-areas:
+                "categories detail"
+                "courses    detail";
+
+            > #category-listing {
+                grid-area: categories;
+            }
+
+            > #course-listing {
+                grid-area: courses;
+            }
+
+            > #course-detail {
+                grid-area: detail;
+            }
+        }
+    }
+}
+
+// Wide screens: all three regions next to each other, which is the layout this page used to have.
+@media (min-width: #{$bu-snippet-coursedetail-wide-min}) {
+    #course-category-listings.course-selected {
+        display: grid;
+        align-items: start;
+        grid-template-columns: 1fr 1fr;
+
+        &.viewmode-combined {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+    }
+}
+
+// The panel sticks to the top as soon as it is a column of its own, so that it stays in view
+// while the listings are scrolled.
+@media (min-width: #{$bu-snippet-coursedetail-split-min}) {
+    #course-category-listings.course-selected > #course-detail {
+        position: sticky;
+        top: $bu-snippet-coursedetail-top;
+        max-height: calc(100vh - #{$bu-snippet-coursedetail-top} - #{$bu-snippet-coursedetail-sticky-offset});
+        overflow-y: auto;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// The selected course.
+//
+// Moodle marks the selected course with a 5px border on the left edge only, which is easy to
+// miss in a long listing. A background tint and a bold name make it obvious which course the
+// panel belongs to.
+// ---------------------------------------------------------------------------
+
+#course-category-listings .listitem-course[data-selected="1"] {
+    background-color: rgba($bu-snippet-coursedetail-accent, .08);
+    border-left-color: $bu-snippet-coursedetail-accent;
+
+    .coursename {
+        font-weight: $font-weight-bold;
+    }
+}
