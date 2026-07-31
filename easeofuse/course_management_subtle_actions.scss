@@ -1,11 +1,11 @@
 /**
- * Snippet Title: Subtle action icons on the course management page
+ * Snippet Title: Subtle row controls on the course management page
  * Scope:         global
  * Goal:          easeofuse
- * Description:   The course and category management page shows a whole row of action icons next to every category and every course. All of these icons compete for attention at the same time, which makes the listings look busy and makes it hard to find the category or course you are actually looking for. This snippet dims the action icons and brings them back to full strength as soon as you point at, or tab into, the row they belong to.
+ * Description:   The course and category management page puts a whole set of controls on every single row: a drag handle, a bulk selection checkbox and a row of action icons. All of them compete for attention at the same time, which makes the listings look busy and makes it hard to find the category or course you are actually looking for. This snippet dims those controls and brings them back to full strength as soon as you point at, or tab into, the row they belong to. The selected category and the selected course keep their controls at full strength permanently.
  * Creator:       bdecent gmbh
  * Tested on:     Moodle 5.2 with Boost Union 5.2 (SCSS compile checked, visual check pending)
- * Usage note:    The icons are only dimmed, never hidden, so they stay clickable at all times and screen readers are not affected at all. Keyboard users get the icons back at full strength as soon as they tab into a row, an opened action menu stays visible while it is open, and the selected category and course keep their icons visible permanently. Set the SCSS variable at the top of the snippet to a higher value if the dimmed icons should stay a little more visible.
+ * Usage note:    The controls are only dimmed, never hidden, so they stay clickable at all times and screen readers are not affected at all. Keyboard users get them back as soon as they tab into a row, and an opened action menu stays visible while it is open. Bulk selection is handled with care: a ticked checkbox is always fully visible, and as soon as the first checkbox is ticked, all checkboxes of the page are shown so that the selection can be extended without hunting for them. Set the SCSS variable at the top of the snippet to a higher value if the dimmed controls should stay a little more visible.
  *
  * @copyright     2026 bdecent gmbh <https://bdecent.de>
  * @author        bdecent gmbh <info@bdecent.de>
@@ -16,46 +16,77 @@
 // Configuration.
 // ---------------------------------------------------------------------------
 
-// The opacity of the action icons while their row is not used.
-// Use a value between 0 and 1. The higher the value, the more visible the icons stay.
+// The opacity of the row controls while their row is not in use.
+// Use a value between 0 and 1. The higher the value, the more visible the controls stay.
 $bu-snippet-managementactions-opacity: .1 !default;
 
-// The duration of the fade. Set it to 0s to switch the icons without a fade.
+// The duration of the fade. Set it to 0s to switch the controls without a fade.
 $bu-snippet-managementactions-duration: .15s !default;
 
 // ---------------------------------------------------------------------------
-// The action icons.
+// The row controls.
 //
 // #course-category-listings is the id of the listing grid on the course and category
-// management page, so the snippet cannot leak into any other page.
+// management page, so the snippet cannot leak into any other page. Everything is scoped
+// to .listitem so that the controls which belong to a whole listing, rather than to a
+// single row, keep their normal appearance.
+//
+// The three controls are: .drag-handle, the move icon which courses carry when they can be
+// resorted; .form-check, the wrapper around the bulk selection checkbox which both categories
+// and courses carry; and .item-actions, the action menu of the row.
 // ---------------------------------------------------------------------------
 
-#course-category-listings {
+#course-category-listings .listitem {
+    .drag-handle,
+    .form-check,
     .item-actions {
         opacity: $bu-snippet-managementactions-opacity;
         transition: opacity $bu-snippet-managementactions-duration ease-in-out;
     }
 
-    // Bring the icons back as soon as the row is pointed at or used with the keyboard.
-    // :focus-within is what keeps the icons reachable for keyboard users. Moodle adds the
-    // .show class to the action menu while it is open, which keeps the icons of that row
-    // visible even if the focus should wander off into the opened menu.
+    // Bring the controls back as soon as the row is pointed at or used with the keyboard.
+    // :focus-within is what keeps them reachable for keyboard users.
     //
-    // The selected category and the selected course keep their icons at full strength at all
-    // times. Those are the two rows the user is working with, so their actions are the ones
+    // The selected category and the selected course keep their controls at full strength at
+    // all times. Those are the rows the user is working with, so their controls are the ones
     // most likely to be needed next, and it gives the selection another visual anchor.
     // Moodle marks both of them with data-selected, so one rule covers categories and courses.
-    .listitem:hover .item-actions,
-    .listitem:focus-within .item-actions,
-    .listitem[data-selected="1"] .item-actions,
+    &:hover,
+    &:focus-within,
+    &[data-selected="1"] {
+        .drag-handle,
+        .form-check,
+        .item-actions {
+            opacity: 1;
+        }
+    }
+
+    // Moodle adds the .show class to the action menu while it is open, which keeps the icons
+    // of that row visible even if the focus should wander off into the opened menu.
     .item-actions.show {
+        opacity: 1;
+    }
+
+    // A ticked checkbox must never be dimmed. A bulk selection which is invisible as soon as
+    // the pointer moves away would be a much worse problem than a busy looking listing.
+    .form-check:has(.bulk-action-checkbox:checked) {
         opacity: 1;
     }
 }
 
+// As soon as the first checkbox is ticked, a bulk selection is under way. From that moment on,
+// all checkboxes are shown, so that the selection can be extended without hunting for them.
+#course-category-listings:has(.bulk-action-checkbox:checked) .listitem .form-check {
+    opacity: 1;
+}
+
 // Respect the users' motion preferences.
 @media (prefers-reduced-motion: reduce) {
-    #course-category-listings .item-actions {
-        transition: none;
+    #course-category-listings .listitem {
+        .drag-handle,
+        .form-check,
+        .item-actions {
+            transition: none;
+        }
     }
 }
