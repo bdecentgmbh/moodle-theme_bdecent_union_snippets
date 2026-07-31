@@ -1,0 +1,149 @@
+/**
+ * Snippet Title: Course reports as cards
+ * Scope:         course
+ * Goal:          easeofuse
+ * Description:   The course reports page (Course > Reports) shows the available reports as a plain bullet list of links. This snippet turns this list into a responsive grid of cards with a recognizable icon per report, which makes the page much easier to scan and provides a considerably larger click target.
+ * Creator:       bdecent gmbh
+ * Tested on:     Moodle 5.2 with Boost Union 5.2 (SCSS compile checked, visual check pending)
+ * Usage note:    Reports which are not known to this snippet (for example reports from additional plugins) get a neutral fallback icon, so the page keeps working as expected. The card look is controlled by the SCSS variables at the top of the snippet. As they are declared with !default, you can override any of them in "Raw initial SCSS" without touching the snippet. If you want the same look on the course reuse page, use the "Course reuse actions as cards" snippet in addition.
+ *
+ * @copyright     2026 bdecent gmbh <https://bdecent.de>
+ * @author        bdecent gmbh <info@bdecent.de>
+ * @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+// ---------------------------------------------------------------------------
+// Configuration.
+// ---------------------------------------------------------------------------
+
+// The minimal width of a single card. The number of columns is derived from it.
+$bu-snippet-reportcards-min-width: 15rem !default;
+
+// The gap between the cards and the inner spacing of a card.
+$bu-snippet-reportcards-gap: 1rem !default;
+$bu-snippet-reportcards-padding: 1.25rem !default;
+
+// The icon size and color.
+$bu-snippet-reportcards-icon-size: 1.75rem !default;
+$bu-snippet-reportcards-icon-color: $primary !default;
+
+// The card colors.
+$bu-snippet-reportcards-bg: $card-bg !default;
+$bu-snippet-reportcards-border-color: $border-color !default;
+$bu-snippet-reportcards-hover-border-color: $primary !default;
+$bu-snippet-reportcards-hover-color: $primary !default;
+
+// ---------------------------------------------------------------------------
+// The card grid.
+//
+// The course reports page and the course reuse page share the very same core template
+// (core/report_link_page) and even the same page type, so they can only be distinguished
+// by the links which they contain. This snippet therefore only picks the list which
+// actually holds links to report pages.
+// ---------------------------------------------------------------------------
+
+#region-main [class~="container-fluid"] > div > ul.list-unstyled:has(> li > a[href*="/report/"]) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax($bu-snippet-reportcards-min-width, 1fr));
+    gap: $bu-snippet-reportcards-gap;
+    margin-top: $bu-snippet-reportcards-gap;
+
+    // Let the list items stretch so that all cards in a row share the same height.
+    > li {
+        display: flex;
+    }
+
+    // The link becomes the card.
+    > li > a {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        gap: .75rem;
+        padding: $bu-snippet-reportcards-padding;
+        border: $border-width solid $bu-snippet-reportcards-border-color;
+        @include border-radius($card-border-radius);
+        background-color: $bu-snippet-reportcards-bg;
+        color: $body-color;
+        font-weight: $font-weight-bold;
+        text-align: center;
+        text-decoration: none;
+        transition:
+            border-color .15s ease-in-out,
+            box-shadow .15s ease-in-out,
+            transform .15s ease-in-out;
+
+        // The icon. The fallback icon is used for all reports which are not known below,
+        // the individual reports overwrite it with a matching icon.
+        &::before {
+            display: block;
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: $bu-snippet-reportcards-icon-size;
+            line-height: 1;
+            color: $bu-snippet-reportcards-icon-color;
+            content: "\f15c"; // fa-file-lines.
+        }
+
+        &:hover,
+        &:focus-visible {
+            border-color: $bu-snippet-reportcards-hover-border-color;
+            box-shadow: $box-shadow-sm;
+            color: $bu-snippet-reportcards-hover-color;
+            transform: translateY(-2px);
+        }
+
+        // Individual icons for the reports which ship with Moodle core.
+        &[href*="/report/competency/"]::before {
+            content: "\f559"; // fa-award.
+        }
+
+        &[href*="/report/completion/"]::before {
+            content: "\f0ae"; // fa-list-check.
+        }
+
+        &[href*="/report/courseoverview/"]::before {
+            content: "\f200"; // fa-chart-pie.
+        }
+
+        &[href*="/report/insights/"]::before {
+            content: "\f0eb"; // fa-lightbulb.
+        }
+
+        &[href*="/report/log/"]::before {
+            content: "\f46d"; // fa-clipboard-list.
+        }
+
+        &[href*="/report/loglive/"]::before {
+            content: "\f519"; // fa-tower-broadcast.
+        }
+
+        &[href*="/report/outline/"]::before {
+            content: "\f080"; // fa-chart-bar.
+        }
+
+        &[href*="/report/participation/"]::before {
+            content: "\f0c0"; // fa-users.
+        }
+
+        &[href*="/report/progress/"]::before {
+            content: "\f828"; // fa-bars-progress.
+        }
+
+        &[href*="/report/stats/"]::before {
+            content: "\f201"; // fa-chart-line.
+        }
+    }
+}
+
+// Respect the users' motion preferences.
+@media (prefers-reduced-motion: reduce) {
+    #region-main [class~="container-fluid"] > div > ul.list-unstyled:has(> li > a[href*="/report/"]) > li > a {
+        transition: none;
+
+        &:hover,
+        &:focus-visible {
+            transform: none;
+        }
+    }
+}

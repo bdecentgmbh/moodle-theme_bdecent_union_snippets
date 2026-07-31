@@ -1,0 +1,91 @@
+/**
+ * Snippet Title: Collapsed filter on the enrolled users page
+ * Scope:         course
+ * Goal:          easeofuse
+ * Description:   On the enrolled users page, the filter form takes up a considerable amount of space above the participants table, although filtering the participants is only needed in large courses. This snippet collapses the filter form into a small filter icon. The filter form unfolds as soon as the icon is touched, hovered or entered with the keyboard and it stays unfolded as long as it is used. If a filter is applied, the filter form is unfolded permanently so that the applied filter always stays visible.
+ * Creator:       bdecent gmbh
+ * Tested on:     Moodle 5.2 with Boost Union 5.2 (SCSS compile checked, visual check pending)
+ * Usage note:    SCSS snippets can only contain CSS, they can not add any JavaScript to the page. A real click handler is therefore not possible - the filter form is unfolded with the CSS :hover and :focus-within states instead. On touch devices, this means that the filter form unfolds when you tap the icon. On desktop devices, it unfolds when you move the pointer onto the icon or when you tab into the filter form with the keyboard, and it folds back when you leave it again without having used it. The size and the colors are controlled by the SCSS variables at the top of the snippet. As they are declared with !default, you can override any of them in "Raw initial SCSS" without touching the snippet.
+ *
+ * @copyright     2026 bdecent gmbh <https://bdecent.de>
+ * @author        bdecent gmbh <info@bdecent.de>
+ * @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+// ---------------------------------------------------------------------------
+// Configuration.
+// ---------------------------------------------------------------------------
+
+// The width and the height of the collapsed filter icon.
+// Set the width to 100% if you prefer a full width bar instead of a compact icon.
+$bu-snippet-participantsfilter-width: 2.5rem !default;
+$bu-snippet-participantsfilter-height: 2.5rem !default;
+
+// The size and the color of the filter icon.
+$bu-snippet-participantsfilter-icon-size: 1rem !default;
+$bu-snippet-participantsfilter-icon-color: $body-color !default;
+
+// ---------------------------------------------------------------------------
+// The collapsed filter.
+//
+// The enrolled users page is the only page which uses the core/datafilter templates
+// within a page of the type "course-view-participants", so the snippet is scoped to
+// this page type. The question bank filter, which is built from the same templates,
+// is not affected.
+// ---------------------------------------------------------------------------
+
+// The unfolded state of the filter form. It is needed in more than one place below.
+@mixin bu-snippet-participantsfilter-unfold {
+    width: auto;
+    max-height: none;
+    // Let the autocomplete suggestion lists of the filter values overflow the filter form again.
+    overflow: visible;
+
+    // Remove the filter icon which covers the filter form in the collapsed state.
+    &::before {
+        content: none;
+    }
+}
+
+#page-course-view-participants #region-main form[method="dialog"] > .filter-group {
+    position: relative;
+    // Shrink the filter form down to the size of the filter icon.
+    // The filter form is only clipped, not hidden, so that it stays reachable with the keyboard.
+    width: $bu-snippet-participantsfilter-width;
+    max-height: $bu-snippet-participantsfilter-height;
+    overflow: hidden;
+
+    // The filter icon. It is drawn on top of the clipped filter form and covers it completely,
+    // so that none of the clipped form controls shines through or can be clicked accidentally.
+    // The inset is relative to the padding box, so the .p-2 padding of the filter form is covered as well.
+    &::before {
+        content: "\f0b0"; // fa-filter.
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        // Take over the background color of the filter form to hide the clipped form controls.
+        background-color: inherit;
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        font-size: $bu-snippet-participantsfilter-icon-size;
+        line-height: 1;
+        color: $bu-snippet-participantsfilter-icon-color;
+        cursor: pointer;
+    }
+
+    // Unfold the filter form when it is touched, hovered or used with the keyboard.
+    &:hover,
+    &:focus-within {
+        @include bu-snippet-participantsfilter-unfold;
+    }
+
+    // Unfold the filter form permanently as soon as a filter condition is set, so that
+    // the applied filter is never hidden from the user. An unused filter row carries an
+    // empty data-filter-type attribute, a used one carries the name of the filter type.
+    &:has([data-filterregion="filter"]:not([data-filter-type=""])) {
+        @include bu-snippet-participantsfilter-unfold;
+    }
+}

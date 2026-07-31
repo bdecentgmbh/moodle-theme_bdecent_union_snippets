@@ -1,0 +1,129 @@
+/**
+ * Snippet Title: Course reuse actions as cards
+ * Scope:         course
+ * Goal:          easeofuse
+ * Description:   The course reuse page (Course > More > Course reuse) shows the available actions - import, backup, restore, copy and reset - as a plain bullet list of links. This snippet turns this list into a responsive grid of cards with a recognizable icon per action, which makes the page much easier to scan and provides a considerably larger click target.
+ * Creator:       bdecent gmbh
+ * Tested on:     Moodle 5.2 with Boost Union 5.2 (SCSS compile checked, visual check pending)
+ * Usage note:    Actions which are not known to this snippet (for example actions from additional plugins) get a neutral fallback icon, so the page keeps working as expected. The card look is controlled by the SCSS variables at the top of the snippet. As they are declared with !default, you can override any of them in "Raw initial SCSS" without touching the snippet. If you want the same look on the course reports page, use the "Course reports as cards" snippet in addition.
+ *
+ * @copyright     2026 bdecent gmbh <https://bdecent.de>
+ * @author        bdecent gmbh <info@bdecent.de>
+ * @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+// ---------------------------------------------------------------------------
+// Configuration.
+// ---------------------------------------------------------------------------
+
+// The minimal width of a single card. The number of columns is derived from it.
+$bu-snippet-reusecards-min-width: 15rem !default;
+
+// The gap between the cards and the inner spacing of a card.
+$bu-snippet-reusecards-gap: 1rem !default;
+$bu-snippet-reusecards-padding: 1.25rem !default;
+
+// The icon size and color.
+$bu-snippet-reusecards-icon-size: 1.75rem !default;
+$bu-snippet-reusecards-icon-color: $primary !default;
+
+// The card colors.
+$bu-snippet-reusecards-bg: $card-bg !default;
+$bu-snippet-reusecards-border-color: $border-color !default;
+$bu-snippet-reusecards-hover-border-color: $primary !default;
+$bu-snippet-reusecards-hover-color: $primary !default;
+
+// ---------------------------------------------------------------------------
+// The card grid.
+//
+// The course reuse page and the course reports page share the very same core template
+// (core/report_link_page) and even the same page type, so they can only be distinguished
+// by the links which they contain. This snippet therefore only picks the list which
+// actually holds links to course reuse actions.
+// ---------------------------------------------------------------------------
+
+#region-main [class~="container-fluid"] > div > ul.list-unstyled:has(> li > a[href*="/backup/"], > li > a[href*="/course/reset.php"]) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax($bu-snippet-reusecards-min-width, 1fr));
+    gap: $bu-snippet-reusecards-gap;
+    margin-top: $bu-snippet-reusecards-gap;
+
+    // Let the list items stretch so that all cards in a row share the same height.
+    > li {
+        display: flex;
+    }
+
+    // The link becomes the card.
+    > li > a {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+        gap: .75rem;
+        padding: $bu-snippet-reusecards-padding;
+        border: $border-width solid $bu-snippet-reusecards-border-color;
+        @include border-radius($card-border-radius);
+        background-color: $bu-snippet-reusecards-bg;
+        color: $body-color;
+        font-weight: $font-weight-bold;
+        text-align: center;
+        text-decoration: none;
+        transition:
+            border-color .15s ease-in-out,
+            box-shadow .15s ease-in-out,
+            transform .15s ease-in-out;
+
+        // The icon. The fallback icon is used for all actions which are not known below,
+        // the individual actions overwrite it with a matching icon.
+        &::before {
+            display: block;
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: $bu-snippet-reusecards-icon-size;
+            line-height: 1;
+            color: $bu-snippet-reusecards-icon-color;
+            content: "\f1b8"; // fa-recycle.
+        }
+
+        &:hover,
+        &:focus-visible {
+            border-color: $bu-snippet-reusecards-hover-border-color;
+            box-shadow: $box-shadow-sm;
+            color: $bu-snippet-reusecards-hover-color;
+            transform: translateY(-2px);
+        }
+
+        // Individual icons for the course reuse actions which ship with Moodle core.
+        &[href*="/backup/import.php"]::before {
+            content: "\f56f"; // fa-file-import.
+        }
+
+        &[href*="/backup/backup.php"]::before {
+            content: "\f187"; // fa-box-archive.
+        }
+
+        &[href*="/backup/restorefile.php"]::before {
+            content: "\f0e2"; // fa-arrow-rotate-left.
+        }
+
+        &[href*="/backup/copy.php"]::before {
+            content: "\f0c5"; // fa-copy.
+        }
+
+        &[href*="/course/reset.php"]::before {
+            content: "\f12d"; // fa-eraser.
+        }
+    }
+}
+
+// Respect the users' motion preferences.
+@media (prefers-reduced-motion: reduce) {
+    #region-main [class~="container-fluid"] > div > ul.list-unstyled:has(> li > a[href*="/backup/"], > li > a[href*="/course/reset.php"]) > li > a {
+        transition: none;
+
+        &:hover,
+        &:focus-visible {
+            transform: none;
+        }
+    }
+}

@@ -1,0 +1,170 @@
+/**
+ * Snippet Title: Slim menu bar
+ * Scope:         global
+ * Goal:          eyecandy
+ * Description:   This snippet turns the Boost Union smart menu bar (the additional bar above the navbar) into a slim, compact bar with a dark background, small bold labels and right-aligned menu items. All vertical offsets which Boost Union derives from the default menu bar height (page content, left / right / message drawers, drawer togglers and the navbar below) are recalculated from a single height variable, so the layout stays consistent.
+ * Creator:       bdecent gmbh
+ * Tested on:     Moodle 5.2 with Boost Union 5.2 (SCSS compile checked, visual check pending)
+ * Usage note:    This snippet only has an effect if at least one smart menu is configured with the location "Menu bar". The look is controlled by the SCSS variables at the top of the snippet. As they are declared with !default, you can override any of them in "Raw initial SCSS" without touching the snippet.
+ *
+ * @copyright     2026 bdecent gmbh <https://bdecent.de>
+ * @author        bdecent gmbh <info@bdecent.de>
+ * @license       http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+// ---------------------------------------------------------------------------
+// Configuration.
+// ---------------------------------------------------------------------------
+
+// The height of the slim menu bar (Boost Union uses 40px by default).
+$bu-snippet-slimmenubar-height: 26px !default;
+
+// The colors of the bar and of its menu items.
+$bu-snippet-slimmenubar-bg: #09042e !default;
+$bu-snippet-slimmenubar-color: $white !default;
+$bu-snippet-slimmenubar-hover-bg: rgba($white, .15) !default;
+$bu-snippet-slimmenubar-hover-color: $white !default;
+$bu-snippet-slimmenubar-active-bg: $white !default;
+$bu-snippet-slimmenubar-active-color: $bu-snippet-slimmenubar-bg !default;
+
+// The typography and the spacing of the menu items.
+$bu-snippet-slimmenubar-font-size: .8125rem !default;
+$bu-snippet-slimmenubar-font-weight: $font-weight-bold !default;
+$bu-snippet-slimmenubar-padding-x: .625rem !default;
+
+// The horizontal alignment of the menu items (flex-end = right, flex-start = left, center = centered).
+$bu-snippet-slimmenubar-justify-content: flex-end !default;
+
+// ---------------------------------------------------------------------------
+// Derived values. There should be no need to modify anything below this line.
+// ---------------------------------------------------------------------------
+
+// The offset of all elements which are stacked below the navbar and the menu bar.
+$bu-snippet-slimmenubar-offset: calc(#{$navbar-height} + #{$bu-snippet-slimmenubar-height});
+
+// ---------------------------------------------------------------------------
+// The slim menu bar.
+// ---------------------------------------------------------------------------
+
+.theme-boost-union-smartmenu {
+    .navbar.fixed-top.boost-union-menubar {
+        // Shrink the bar itself. The navbar padding has to go as well, otherwise the
+        // menu items would not fit into the reduced height anymore.
+        height: $bu-snippet-slimmenubar-height;
+        min-height: $bu-snippet-slimmenubar-height;
+        padding-top: 0;
+        padding-bottom: 0;
+        border-bottom: 0;
+        background-color: $bu-snippet-slimmenubar-bg;
+
+        // Move the menu items to the configured side of the bar.
+        &.navbar-expand {
+            justify-content: $bu-snippet-slimmenubar-justify-content;
+        }
+
+        // Shrink the menu container as well, Boost Union sets an explicit height there.
+        .moremenu,
+        .moremenu .more-nav {
+            height: $bu-snippet-slimmenubar-height;
+            flex-wrap: nowrap;
+        }
+
+        // Style the top level menu items. Items within the dropdown menus are not
+        // touched, they should stay readable in their regular size.
+        .moremenu .more-nav > li > .nav-link {
+            display: flex;
+            align-items: center;
+            height: $bu-snippet-slimmenubar-height;
+            padding: 0 $bu-snippet-slimmenubar-padding-x;
+            // Boost adds an active border at the bottom which does not fit into a slim bar.
+            border-bottom: 0;
+            font-size: $bu-snippet-slimmenubar-font-size;
+            font-weight: $bu-snippet-slimmenubar-font-weight;
+            line-height: 1;
+            color: $bu-snippet-slimmenubar-color;
+
+            // Let smart menu icons follow the label color.
+            .icon {
+                color: inherit;
+            }
+
+            &:hover,
+            &:focus {
+                background-color: $bu-snippet-slimmenubar-hover-bg;
+                color: $bu-snippet-slimmenubar-hover-color;
+            }
+
+            // This covers the currently active menu item as well as an opened dropdown menu.
+            &.active,
+            &[aria-expanded="true"] {
+                border-color: transparent;
+                background-color: $bu-snippet-slimmenubar-active-bg;
+                color: $bu-snippet-slimmenubar-active-color;
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // Recalculate all offsets which Boost Union derives from the menu bar height.
+        // ---------------------------------------------------------------------
+
+        // The navbar which is stacked below the menu bar.
+        + .navbar.fixed-top {
+            margin-top: $bu-snippet-slimmenubar-height;
+        }
+
+        // The page content.
+        ~ #page.drawers {
+            margin-top: $bu-snippet-slimmenubar-offset;
+        }
+
+        // The message drawer.
+        ~ [data-region="right-hand-drawer"].drawer {
+            top: $bu-snippet-slimmenubar-offset;
+        }
+
+        // The course index drawer and the block drawer.
+        ~ .drawer.drawer-left,
+        ~ .drawer.drawer-right {
+            top: calc(#{$bu-snippet-slimmenubar-offset} + 1px);
+        }
+    }
+}
+
+// The drawers are positioned differently on smaller screens.
+@include media-breakpoint-down(lg) {
+    .theme-boost-union-smartmenu .navbar.fixed-top.boost-union-menubar ~ .drawer {
+        top: $bu-snippet-slimmenubar-offset;
+
+        &.drawer-right {
+            top: 0;
+        }
+    }
+}
+
+// The drawer toggler buttons float directly below the header.
+@include media-breakpoint-up(md) {
+    .theme-boost-union-smartmenu .navbar.fixed-top.boost-union-menubar ~ #page.drawers .drawer-toggles .drawer-toggler {
+        top: calc(#{$bu-snippet-slimmenubar-offset} + 10px);
+    }
+}
+
+// If the menu bar is hidden on a particular viewport (which can happen if the smart menu
+// is restricted to certain devices), Boost Union compensates the missing bar with a page
+// offset which is based on the menu bar height as well. Keep these rules in sync.
+@include media-breakpoint-up(lg) {
+    .theme-boost-union-smartmenu .navbar.fixed-top.boost-union-menubar.d-lg-none ~ #page.drawers {
+        margin-top: $bu-snippet-slimmenubar-height;
+    }
+}
+
+@include media-breakpoint-only(md) {
+    .theme-boost-union-smartmenu .navbar.fixed-top.boost-union-menubar.d-md-none ~ #page.drawers {
+        margin-top: $bu-snippet-slimmenubar-height;
+    }
+}
+
+@include media-breakpoint-down(md) {
+    .theme-boost-union-smartmenu .navbar.fixed-top.boost-union-menubar.d-none ~ #page.drawers {
+        margin-top: $bu-snippet-slimmenubar-height;
+    }
+}
